@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="panel narrow">
+  <h2>Sell an item</h2>
+  <form method="post">{{ csrf_field() }}
+    <label>Title</label><input name="title" required>
+    <label>Category</label>
+    <select name="category_id">{% for c in categories %}<option value="{{ c.category_id }}">{{ c.name }}</option>{% endfor %}</select>
+    <label>Price, ₸</label><input name="price" type="number" min="0" required>
+    <label>Condition</label>
+    <select name="condition"><option value="used">used</option><option value="new">new</option></select>
+    <label>Description</label><textarea name="description" rows="3"></textarea>
+    <p><button>Publish</button></p>
+  </form>
+</div>
+{% endblock %}

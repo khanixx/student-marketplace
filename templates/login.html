@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="panel narrow">
+  <h2>Log in</h2>
+  <form method="post">{{ csrf_field() }}
+    <label>Email</label><input name="email" type="email" required>
+    <label>Password</label><input name="password" type="password" required>
+    <p><button>Log in</button></p>
+  </form>
+  <p class="muted">Test account: aruzhan@kbtu.kz / password123</p>
+</div>
+{% endblock %}

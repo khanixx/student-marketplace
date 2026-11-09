@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% from "_ui.html" import icon, card, section, slug with context %}
+{% block content %}
+<div class="hero">
+  <h1>What do you need today?</h1>
+  <form class="search" method="get">
+    <input class="q" name="q" placeholder="Keyword, e.g. textbook" value="{{ q }}">
+    <input name="max_price" placeholder="Max price, ₸" value="{{ max_price }}" inputmode="numeric">
+    {% if category %}<input type="hidden" name="category" value="{{ category }}">{% endif %}
+    <button style="background:var(--sell)">{{ icon('search') }} Search</button>
+  </form>
+</div>
+
+<div class="chips">
+  <a class="chip c-all {{ 'on' if not category }}" href="{{ url_for('index') }}">{{ icon('grid') }} All</a>
+  {% for c in categories %}
+    <a class="chip c-{{ slug(c.name) }} {{ 'on' if category == c.category_id|string }}" href="{{ url_for('index', category=c.category_id) }}">{{ icon(slug(c.name)) }} {{ c.name }} <small>{{ c.n }}</small></a>
+  {% endfor %}
+</div>
+
+{% if grouped %}
+  {% for name, items in listings|groupby('category') %}{{ section(name, items) }}{% endfor %}
+  {% if not listings %}<div class="empty">Nothing listed yet.</div>{% endif %}
+{% else %}
+  <p class="muted">{{ listings|length }} active listing(s), cheapest first</p>
+  <div class="grid">
+    {% for l in listings %}{{ card(l) }}{% else %}<div class="empty">Nothing found. Try another filter.</div>{% endfor %}
+  </div>
+{% endif %}
+{% endblock %}

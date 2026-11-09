@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="panel narrow">
+  <h2>Create an account</h2>
+  <form method="post">{{ csrf_field() }}
+    <label>Student ID</label><input name="student_id" placeholder="24B031936" required>
+    <label>Full name</label><input name="full_name" required>
+    <label>University email</label><input name="email" type="email" required>
+    <label>Password (min 6 characters)</label><input name="password" type="password" minlength="6" required>
+    <p><button>Register</button></p>
+  </form>
+</div>
+{% endblock %}

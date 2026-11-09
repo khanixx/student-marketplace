@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% from "_ui.html" import icon, card with context %}
+{% block content %}
+<h2 style="margin-bottom:14px">My listings</h2>
+<div class="grid">
+  {% for l in listings %}{{ card(l, with_heart=False) }}
+  {% else %}<p>You have no listings yet. <a href="{{ url_for('new_listing') }}">Sell something</a>.</p>{% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% from "_ui.html" import icon, section with context %}
+{% block content %}
+<h2 style="margin-bottom:16px">{{ icon('heart', 22) }} Favourites</h2>
+{% for name, items in listings|groupby('category') %}{{ section(name, items) }}
+{% else %}
+  <div class="panel empty">{{ icon('heart', 36) }}<p>No saved listings yet. Tap the heart on any listing to keep it here.</p>
+  <a class="btn" href="{{ url_for('index') }}">Browse listings</a></div>
+{% endfor %}
+{% endblock %}

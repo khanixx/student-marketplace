@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% from "_ui.html" import icon, slug with context %}
+{% block content %}
+<div class="panel c-{{ slug(item.category) }}">
+  <div class="detail">
+    <div class="big">{{ icon(slug(item.category), 56) }}</div>
+    <div class="info">
+      <span class="tag {{ item.status }}">{{ item.status }}</span> <span class="tag">{{ item.category }}</span>
+      <h2>{{ item.title }}</h2>
+      <div class="price">{{ "{:,}".format(item.price) }} ₸</div>
+      <p>{{ item.description }}</p>
+      <p class="muted">Condition: {{ item.condition }} · Seller: {{ item.seller }}</p>
+      <div class="actions">
+        {% set on = item.listing_id in fav_ids %}
+        <form method="post" action="{{ url_for('toggle_favourite', listing_id=item.listing_id) }}">{{ csrf_field() }}
+          <input type="hidden" name="next" value="{{ request.path }}">
+          <button class="btn ghost {{ 'on' if on }}">{{ icon('heart') }} {{ 'Saved' if on else 'Save to favourites' }}</button>
+        </form>
+        {% if me and me.user_id == item.seller_id and item.status == 'active' %}
+        <form method="post" action="{{ url_for('mark_sold', listing_id=item.listing_id) }}">{{ csrf_field() }}
+          <button class="ok btn">{{ icon('check') }} Mark as sold</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="panel" style="margin-top:16px">
+  <h3>Messages</h3>
+  {% if not me %}
+    <p><a href="{{ url_for('login', next=request.path) }}">Log in</a> to message the seller.</p>
+  {% else %}
+    {% for m in messages %}
+      <div class="msg {{ 'mine' if m.sender_id == me.user_id }}"><b>{{ m.sender }}</b> <span class="muted">{{ m.sent_at }}</span><br>{{ m.text }}</div>
+    {% else %}
+      <p class="muted">No messages yet.</p>
+    {% endfor %}
+
+    {% if me.user_id != item.seller_id %}
+      <form method="post">{{ csrf_field() }}<label>Write to the seller</label>
+        <textarea name="text" rows="2" required></textarea><p><button>Send</button></p></form>
+    {% elif buyers %}
+      <form method="post">{{ csrf_field() }}<label>Reply to</label>
+        <select name="receiver_id">{% for b in buyers %}<option value="{{ b.user_id }}">{{ b.full_name }}</option>{% endfor %}</select>
+        <label>Message</label><textarea name="text" rows="2" required></textarea><p><button>Send</button></p></form>
+    {% endif %}
+  {% endif %}
+</div>
+{% endblock %}

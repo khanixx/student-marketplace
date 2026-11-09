@@ -1,0 +1,53 @@
+{# Shared UI pieces: inline SVG icons (no external files) and the listing card. #}
+{% set P = {
+ 'books':'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',
+ 'electronics':'<path d="M3 14v-2a9 9 0 0 1 18 0v2"/><path d="M21 15a2 2 0 0 1-2 2h-1v-5h1a2 2 0 0 1 2 2zM3 15a2 2 0 0 0 2 2h1v-5H5a2 2 0 0 0-2 2z"/>',
+ 'clothes':'<path d="M20.4 5.6 16 3a4 4 0 0 1-8 0L3.6 5.6a1 1 0 0 0-.5 1.2l1 3.2a1 1 0 0 0 1 .7H7V21h10V10.7h1.9a1 1 0 0 0 1-.7l1-3.2a1 1 0 0 0-.5-1.2z"/>',
+ 'dorm-items':'<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/>',
+ 'services':'<path d="M14.7 6.3a4 4 0 0 0-5.4 5.1L3 17.7 6.3 21l6.3-6.3a4 4 0 0 0 5.1-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/>',
+ 'tag':'<path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L2 12V2h10l8.6 8.6a2 2 0 0 1 0 2.8z"/><circle cx="7" cy="7" r="1.5"/>',
+ 'heart':'<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"/>',
+ 'search':'<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>',
+ 'plus':'<path d="M12 5v14M5 12h14"/>',
+ 'list':'<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
+ 'logout':'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/>',
+ 'grid':'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
+ 'check':'<path d="M20 6 9 17l-5-5"/>',
+ 'bag':'<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>'
+} %}
+
+{% macro slug(name) -%}{{ name|lower|replace(' ', '-') }}{%- endmacro %}
+
+{% macro icon(name, size=18) -%}
+<svg class="ic" width="{{ size }}" height="{{ size }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{{ (P.get(name) or P.tag)|safe }}</svg>
+{%- endmacro %}
+
+{% macro heart(l) -%}
+{% set on = l.listing_id in fav_ids %}
+<form method="post" action="{{ url_for('toggle_favourite', listing_id=l.listing_id) }}" class="favform">{{ csrf_field() }}
+  <input type="hidden" name="next" value="{{ request.full_path }}">
+  <button class="fav {{ 'on' if on }}" aria-label="{{ 'Remove from favourites' if on else 'Save to favourites' }}" title="{{ 'Remove from favourites' if on else 'Save to favourites' }}">{{ icon('heart', 18) }}</button>
+</form>
+{%- endmacro %}
+
+{% macro card(l, with_heart=True) -%}
+{% set s = slug(l.category) %}
+<article class="item c-{{ s }}">
+  <div class="thumb">{{ icon(s, 36) }}</div>
+  <div class="body">
+    <div><span class="tag">{{ l.category }}</span>{% if l.status != 'active' %} <span class="tag {{ l.status }}">{{ l.status }}</span>{% endif %}</div>
+    <h3><a class="stretch" href="{{ url_for('listing', listing_id=l.listing_id) }}">{{ l.title }}</a></h3>
+    <div class="price">{{ "{:,}".format(l.price) }} ₸</div>
+    <div class="muted">{{ l.condition }}{% if l.seller %} · {{ l.seller }}{% endif %}</div>
+  </div>
+  {% if with_heart %}{{ heart(l) }}{% endif %}
+</article>
+{%- endmacro %}
+
+{% macro section(name, items, count=None) -%}
+{% set s = slug(name) %}
+<section class="cat c-{{ s }}">
+  <div class="cat-head"><span class="cat-ic">{{ icon(s, 20) }}</span><h2>{{ name }}</h2><span class="muted">{{ items|length }}</span></div>
+  <div class="grid">{% for l in items %}{{ card(l) }}{% endfor %}</div>
+</section>
+{%- endmacro %}

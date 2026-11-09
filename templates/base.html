@@ -1,0 +1,121 @@
+{% from "_ui.html" import icon with context %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Student Marketplace{% endblock %}</title>
+  <style>
+    :root { --ink:#1c1b3a; --muted:#6b6f8d; --line:#e3e5f2; --bg:#f3f4fb; --brand:#3730a3; --brand2:#4f46e5;
+            --sell:#ff6b4a; --heart:#e11d48; --ok:#059669; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:system-ui,-apple-system,"Segoe UI",sans-serif; color:var(--ink); background:var(--bg); line-height:1.45; }
+    a { color:var(--brand2); }
+    .ic { flex:none; vertical-align:-3px; }
+    :focus-visible { outline:3px solid #a5b4fc; outline-offset:2px; }
+
+    header { background:var(--brand); color:#fff; position:sticky; top:0; z-index:5; }
+    .bar { max-width:1040px; margin:0 auto; padding:12px 16px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    .brand { display:flex; align-items:center; gap:8px; font-weight:800; font-size:18px; color:#fff; text-decoration:none; margin-right:auto; }
+    .brand .ic { background:var(--sell); border-radius:9px; padding:5px; width:30px; height:30px; }
+    nav { display:flex; align-items:center; gap:4px; flex-wrap:wrap; }
+    nav a { color:#e0e7ff; text-decoration:none; padding:7px 11px; border-radius:99px; display:inline-flex; gap:6px; align-items:center; }
+    nav a:hover { background:rgba(255,255,255,.14); color:#fff; }
+    nav a.sell { background:var(--sell); color:#fff; font-weight:600; }
+    nav a.sell:hover { background:#ff5632; }
+    nav form.logout { display:inline; margin:0; }
+    nav .navbtn { background:none; color:#e0e7ff; font-weight:400; padding:7px 11px; border-radius:99px; gap:6px; }
+    nav .navbtn:hover { background:rgba(255,255,255,.14); color:#fff; }
+    nav .who { color:#c7d2fe; font-size:14px; margin:0 6px; }
+    .badge { background:var(--heart); color:#fff; font-size:11px; font-weight:700; border-radius:99px; padding:0 6px; min-width:18px; text-align:center; }
+
+    main { max-width:1040px; margin:22px auto 48px; padding:0 16px; }
+    h2 { margin:0 0 4px; } h3 { margin:6px 0; font-size:16px; }
+    .muted { color:var(--muted); font-size:14px; }
+    .price { font-weight:800; font-size:19px; }
+    .flash { background:#ecfdf5; border:1px solid #6ee7b7; color:#065f46; padding:10px 14px; border-radius:10px; margin-bottom:16px; }
+    .panel { background:#fff; border:1px solid var(--line); border-radius:14px; padding:18px; }
+    .narrow { max-width:420px; margin:0 auto; }
+
+    /* category colours: --c main, --cb soft background */
+    .c-books { --c:#b45309; --cb:#fef3c7; }
+    .c-electronics { --c:#1d4ed8; --cb:#dbeafe; }
+    .c-clothes { --c:#be185d; --cb:#fce7f3; }
+    .c-dorm-items { --c:#047857; --cb:#d1fae5; }
+    .c-services { --c:#6d28d9; --cb:#ede9fe; }
+    .c-all, .cat, .item { --c:var(--brand); --cb:#e0e7ff; }
+    .c-books.cat,.c-books.item { --c:#b45309; --cb:#fef3c7; } .c-electronics.cat,.c-electronics.item { --c:#1d4ed8; --cb:#dbeafe; }
+    .c-clothes.cat,.c-clothes.item { --c:#be185d; --cb:#fce7f3; } .c-dorm-items.cat,.c-dorm-items.item { --c:#047857; --cb:#d1fae5; }
+    .c-services.cat,.c-services.item { --c:#6d28d9; --cb:#ede9fe; }
+
+    .tag { display:inline-block; padding:2px 9px; border-radius:99px; background:var(--cb,#e0e7ff); color:var(--c,var(--brand)); font-size:12px; font-weight:600; }
+    .tag.sold { background:#fee2e2; color:#b91c1c; } .tag.hidden { background:#eceef5; color:#555a78; } .tag.active { background:#d1fae5; color:#047857; }
+
+    .hero { background:var(--brand); color:#fff; border-radius:18px; padding:22px; margin-bottom:18px; }
+    .hero h1 { margin:0 0 12px; font-size:26px; }
+    form.search { display:flex; gap:8px; flex-wrap:wrap; }
+    form.search input { flex:1; min-width:150px; border:0; }
+    form.search .q { flex:3; min-width:200px; }
+
+    .chips { display:flex; gap:8px; flex-wrap:wrap; margin:0 0 22px; }
+    .chip { display:inline-flex; align-items:center; gap:7px; padding:8px 14px; border-radius:99px; background:var(--cb); color:var(--c); font-weight:600; text-decoration:none; border:2px solid transparent; }
+    .chip small { opacity:.75; font-weight:600; }
+    .chip.on { border-color:var(--c); background:#fff; }
+
+    .cat { margin-bottom:28px; }
+    .cat-head { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+    .cat-head h2 { font-size:20px; margin:0; }
+    .cat-head .more { margin-left:auto; font-size:14px; }
+    .cat-ic { display:grid; place-items:center; width:34px; height:34px; border-radius:10px; background:var(--c); color:#fff; }
+
+    .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:14px; }
+    .item { position:relative; background:#fff; border:1px solid var(--line); border-radius:14px; overflow:hidden; transition:box-shadow .15s; }
+    .item:hover { box-shadow:0 6px 18px rgba(55,48,163,.14); }
+    .item .thumb { height:84px; display:grid; place-items:center; background:var(--cb); color:var(--c); }
+    .item .body { padding:12px 14px 14px; }
+    .stretch { color:inherit; text-decoration:none; } .stretch::after { content:""; position:absolute; inset:0; }
+    .favform { position:absolute; top:8px; right:8px; z-index:2; }
+    .fav { width:36px; height:36px; padding:0; border-radius:50%; background:#fff; color:#9aa0bd; border:1px solid var(--line); display:grid; place-items:center; cursor:pointer; }
+    .fav:hover { color:var(--heart); border-color:#fda4af; }
+    .fav.on { color:var(--heart); } .fav.on svg { fill:currentColor; }
+
+    label { display:block; margin:12px 0 4px; font-size:14px; font-weight:600; }
+    input, select, textarea { width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:10px; font:inherit; background:#fff; color:var(--ink); }
+    button, .btn { display:inline-flex; align-items:center; gap:7px; padding:10px 18px; border:0; border-radius:10px; background:var(--brand2); color:#fff; font:inherit; font-weight:600; cursor:pointer; text-decoration:none; }
+    button:hover, .btn:hover { background:var(--brand); }
+    .btn.ok { background:var(--ok); } .btn.ghost { background:#fff; color:var(--heart); border:1px solid #fda4af; } .btn.ghost.on { background:var(--heart); color:#fff; }
+    .btn.ghost.on svg { fill:currentColor; }
+
+    .detail { display:flex; gap:18px; flex-wrap:wrap; }
+    .detail .big { width:120px; height:120px; border-radius:18px; display:grid; place-items:center; background:var(--cb); color:var(--c); }
+    .detail .info { flex:1; min-width:220px; }
+    .actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
+    .msg { max-width:80%; margin:8px 0; padding:8px 12px; border-radius:12px; background:#eef0fb; }
+    .msg.mine { margin-left:auto; background:#e0e7ff; }
+    .empty { text-align:center; padding:36px 16px; color:var(--muted); }
+    .empty .ic { color:var(--heart); margin-bottom:6px; }
+    @media (prefers-reduced-motion:reduce){ * { transition:none !important; } }
+  </style>
+</head>
+<body>
+<header><div class="bar">
+  <a class="brand" href="{{ url_for('index') }}">{{ icon('bag', 20) }} Student Marketplace</a>
+  <nav>
+    {% if me %}
+      <a class="sell" href="{{ url_for('new_listing') }}">{{ icon('plus') }} Sell</a>
+      <a href="{{ url_for('favourites') }}">{{ icon('heart') }} Favourites{% if fav_ids %} <span class="badge">{{ fav_ids|length }}</span>{% endif %}</a>
+      <a href="{{ url_for('my_listings') }}">{{ icon('list') }} My listings</a>
+      <span class="who">{{ me.full_name }}</span>
+      <form method="post" action="{{ url_for('logout') }}" class="logout">{{ csrf_field() }}<button class="navbtn" title="Log out">{{ icon('logout') }} Log out</button></form>
+    {% else %}
+      <a href="{{ url_for('login') }}">Log in</a>
+      <a class="sell" href="{{ url_for('register') }}">Register</a>
+    {% endif %}
+  </nav>
+</div></header>
+<main>
+  {% for m in get_flashed_messages() %}<div class="flash">{{ m }}</div>{% endfor %}
+  {% block content %}{% endblock %}
+</main>
+</body>
+</html>
